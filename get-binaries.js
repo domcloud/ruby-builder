@@ -1,7 +1,8 @@
 import fs from "fs";
-import path, { dirname, join } from "path";
+import os from "os";
+import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-import { execSync, spawn } from "child_process";
+import { execSync } from "child_process";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const rubyBuilderUrl = 'https://github.com/ruby/ruby-builder/releases/expanded_assets/toolcache';
@@ -36,8 +37,10 @@ const getVersions = async () => {
   fs.writeFileSync(
     __dirname + "/public/metadata.json",
     JSON.stringify({
-      os: execSync('gcc --version').toString().split('\n')[0],
-      versions
+      date: new Date().toISOString(),
+      gcc: execSync('gcc --version').toString().split('\n')[0],
+      machine: [os.platform(), os.arch()].join('-'),
+      versions,
     }, null, 2)
   );
 };
