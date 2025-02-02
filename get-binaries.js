@@ -52,7 +52,7 @@ const installVersions = async () => {
 
   missingVersions.forEach(version => {
     try {
-      execSync(`rvm install ${version}`, { stdio: 'inherit' });
+      execSync(`rvm install ${version} -C "--enable-load-relative,--disable-install-doc"`, { stdio: 'inherit' });
       console.log(`Successfully installed Ruby ${version}`);
     } catch (error) {
       console.error(`Failed to install Ruby ${version}:`, error.message);

@@ -19,3 +19,7 @@ check-rvm:
 # Run the Node.js script
 run-node-script:
 	node $(NODE_SCRIPT)
+
+clean:
+	rm -rf $(HOME)/.rvm/rubies/*
+	rm -rf ./public/*.tar.gz
