@@ -52,7 +52,7 @@ jobs:
       with:
         files: |
           *.tar.gz
-          metadata.json
+          *.json
   release_rocky_assets:
     name: Release Rocky 9 Assets
     needs: create_release
@@ -85,4 +85,4 @@ jobs:
       with:
         files: |
           *.tar.gz
-          metadata.json
+          *.json
