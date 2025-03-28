@@ -3,11 +3,17 @@ import os from "os";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
-import { argv } from "process";
+import { argv, exit } from "process";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const rubyBuilderUrl = 'https://github.com/ruby/ruby-builder/releases/expanded_assets/toolcache';
-const rvmRubiesPath = path.join(process.env.HOME, '.rvm/rubies');
+const rvmExecPath = execSync('which rvm').toString().trim();
+if (!fs.existsSync(rvmExecPath)) {
+  console.error("RVM is not found!");
+  exit(1);
+}
+
+const rvmRubiesPath = path.join(path.dirname(rvmExecPath), '../rubies');
 const tarPath = path.join(__dirname, 'public');
 const prefix = argv.length > 2 ? argv[2] : `${os.arch()}-${os.platform()}`;
 const metadataPath = `${__dirname}/public/${prefix}-metadata.json`;

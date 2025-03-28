@@ -1,0 +1,82 @@
+name: Build and Release
+run-name: Release ${{ inputs.version }}
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.version }}
+        release_name: Release ${{ github.event.inputs.version }}
+        draft: false
+        prerelease: false
+  release_ubuntu_assets:
+    name: Release Ubuntu 24 Assets
+    needs: create_release
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-24.04
+            prefix: ubuntu-amd64
+          - os: ubuntu-24.04-arm
+            prefix: ubuntu-arm64
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install deps
+      run: |
+        apt-get install -y autoconf patch build-essential rustc libssl-dev \
+          libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev \
+          libgdbm6 libgdbm-dev libdb-dev uuid-dev curl nodejs
+    - name: Build Binary
+      run: make all PREFIX=${{ matrix.config.prefix }}
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          *.tar.gz
+          metadata.json
+  release_rocky_assets:
+    name: Release Rocky 9 Assets
+    needs: create_release
+    runs-on: ${{ matrix.config.os }}
+    container:
+      image: rockylinux/rockylinux:9
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-24.04
+            prefix: rocky-amd64
+          - os: ubuntu-24.04-arm
+            prefix: rocky-arm64
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install deps
+      run: |
+        dnf install -y autoconf gcc patch bzip2 openssl-devel \
+        libffi-devel readline zlib-devel gdbm ncurses-devel tar perl-FindBin
+    - name: Build Binary
+      run: make all PREFIX=${{ matrix.config.prefix }}
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          *.tar.gz
+          metadata.json

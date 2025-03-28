@@ -1,7 +1,9 @@
 # Variables
 NODE_SCRIPT = get-binaries.js
 RVM_INSTALL_URL = https://get.rvm.io
-RVM_CHECK = $(HOME)/.rvm/bin/rvm
+RVM_CHECK = $(shell which rvm)
+PREFIX := $(shell uname -s)-$(shell uname -m)
+SHELL := /bin/bash
 
 # Default target
 all: check-rvm run-node-script
@@ -18,8 +20,8 @@ check-rvm:
 
 # Run the Node.js script
 run-node-script:
-	node $(NODE_SCRIPT)
+	bash -lc "node $(NODE_SCRIPT) $(PREFIX)"
 
 clean:
-	rm -rf $(HOME)/.rvm/rubies/*
+	rm -rf $(shell dirname $(shell dirname $(shell which rvm)))/rubies/*
 	rm -rf ./public/*.tar.gz
