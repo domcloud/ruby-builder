@@ -3,12 +3,14 @@ import os from "os";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
+import { argv } from "process";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const rubyBuilderUrl = 'https://github.com/ruby/ruby-builder/releases/expanded_assets/toolcache';
 const rvmRubiesPath = path.join(process.env.HOME, '.rvm/rubies');
 const tarPath = path.join(__dirname, 'public');
-
+const prefix = argv.length > 2 ? argv[2] : `${os.arch()}-${os.platform()}`;
+const metadataPath = `${__dirname}/public/${prefix}-metadata.json`;
 const getVersions = async () => {
   const rubyBuilderData = await (await fetch(rubyBuilderUrl, {
     headers: {
@@ -35,18 +37,19 @@ const getVersions = async () => {
   }
 
   fs.writeFileSync(
-    __dirname + "/public/metadata.json",
+    metadataPath,
     JSON.stringify({
       date: new Date().toISOString(),
       gcc: execSync('gcc --version').toString().split('\n')[0],
       machine: [os.platform(), os.arch()].join('-'),
+      prefix,
       versions,
     }, null, 2)
   );
 };
 
 const installVersions = async () => {
-  const desiredVersions = JSON.parse(fs.readFileSync('./public/metadata.json')).versions;
+  const desiredVersions = JSON.parse(fs.readFileSync(metadataPath)).versions;
   const installedVersions = fs.readdirSync(rvmRubiesPath);
   const missingVersions = desiredVersions.filter(version => !installedVersions.includes(version));
 
@@ -61,10 +64,11 @@ const installVersions = async () => {
 }
 
 const packVersions = async () => {
-  const desiredVersions = JSON.parse(fs.readFileSync('./public/metadata.json')).versions;
+  const desiredVersions = JSON.parse(fs.readFileSync(metadataPath)).versions;
   desiredVersions.forEach(version => {
     const rubyDir = path.join(rvmRubiesPath, `${version}`);
-    const archivePath = path.join(tarPath, `${version}.tar.gz`);
+    const fileName = `${prefix}-${version}.tar.gz`;
+    const archivePath = path.join(tarPath, fileName);
 
     if (fs.existsSync(rubyDir) && !fs.existsSync(archivePath)) {
       try {
@@ -78,9 +82,9 @@ const packVersions = async () => {
   });
 
   fs.readdirSync(tarPath)
-    .filter(file => file.endsWith('.tar.gz'))
+    .filter(file => file.endsWith('.tar.gz') && file.startsWith(prefix))
     .forEach(file => {
-      if (!desiredVersions.includes(file.replace(/.tar.gz$/, ''))) {
+      if (!desiredVersions.includes(file.replace(prefix, '').replace(/.tar.gz$/, ''))) {
         fs.unlinkSync(path.join(tarPath, file));
         console.log(`Deleted outdated archive: ${file}`);
       }
