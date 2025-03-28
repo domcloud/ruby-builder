@@ -39,8 +39,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Install deps
       run: |
-        apt-get update
-        apt-get install -y autoconf patch build-essential rustc libssl-dev \
+        sudo apt-get update
+        sudo apt-get install -y autoconf patch build-essential rustc libssl-dev \
           libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev \
           gawk bison libsqlite3-dev libtool pkg-config sqlite3 procps \
           libgdbm6 libgdbm-dev libdb-dev uuid-dev curl nodejs
