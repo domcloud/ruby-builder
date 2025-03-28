@@ -26,7 +26,7 @@ const getVersions = async () => {
 
   let versions = [];
   {
-    const hrefRegex = new RegExp(`href="[-\\w/]+?\\/((ruby-3|jruby-|truffleruby-)[.\\d]+)-ubuntu-24.04.tar.gz"`, 'g');
+    const hrefRegex = new RegExp(`href="[-\\w/]+?\\/((ruby-3|jruby-|truffleruby-|truffleruby\\+graalvm-)[.\\d]+)-ubuntu-24.04.tar.gz"`, 'g');
 
     // @ts-ignore
     var matches = [
@@ -39,7 +39,7 @@ const getVersions = async () => {
     }
     versions = sortSemver(versions).reverse();
     // remove minor versions
-    versions = versions.filter((x, i) => versions.findIndex(y => y.startsWith(x.substring(0, x.indexOf('.') + 3))) == i);
+    versions = versions.filter((x, i) => versions.findIndex(y => y.startsWith(x.substring(0, x.indexOf('-') + 4))) == i);
   }
 
   fs.writeFileSync(
