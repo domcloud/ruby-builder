@@ -110,8 +110,8 @@ function sortSemver(arr) {
 
 
 async function main() {
-  // await getVersions();
-  // await installVersions();
+  await getVersions();
+  await installVersions();
   await packVersions();
   console.log("builder tasks completed")
 }
