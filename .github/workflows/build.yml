@@ -39,8 +39,10 @@ jobs:
       uses: actions/checkout@v4
     - name: Install deps
       run: |
+        apt-get update
         apt-get install -y autoconf patch build-essential rustc libssl-dev \
           libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev \
+          gawk bison libsqlite3-dev libtool pkg-config sqlite3 procps \
           libgdbm6 libgdbm-dev libdb-dev uuid-dev curl nodejs
     - name: Build Binary
       run: make all PREFIX=${{ matrix.config.prefix }}
@@ -69,8 +71,12 @@ jobs:
       uses: actions/checkout@v4
     - name: Install deps
       run: |
-        dnf install -y autoconf gcc patch bzip2 openssl-devel \
-        libffi-devel readline zlib-devel gdbm ncurses-devel tar perl-FindBin
+        dnf -y install epel-release http://rpms.remirepo.net/enterprise/remi-release-9.rpm
+        dnf config-manager --enable crb
+        dnf -y module enable nodejs:22
+        dnf -y install autoconf gcc patch bzip2 openssl-devel libyaml-devel \
+        libffi-devel readline zlib-devel gdbm-libs ncurses-devel tar perl-FindBin \
+        nodejs curl-minimal which procps diffutils 
     - name: Build Binary
       run: make all PREFIX=${{ matrix.config.prefix }}
     - name: Release
