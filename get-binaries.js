@@ -26,7 +26,7 @@ const getVersions = async () => {
 
   let versions = [];
   {
-    const hrefRegex = new RegExp(`href="[-\\w/]+?\\/((ruby-3|jruby-|truffleruby-|truffleruby\\+graalvm-)[.\\d]+)-ubuntu-24.04.tar.gz"`, 'g');
+    const hrefRegex = new RegExp(`href="[-\\w/]+?\\/((ruby-3|jruby-|truffleruby-)[.\\d]+)-ubuntu-24.04.tar.gz"`, 'g');
 
     // @ts-ignore
     var matches = [
@@ -88,9 +88,9 @@ const packVersions = async () => {
   });
 
   fs.readdirSync(tarPath)
-    .filter(file => file.endsWith('.tar.gz') && file.startsWith(prefix))
+    .filter(file => file.endsWith('.tar.gz') && file.startsWith(prefix + '-'))
     .forEach(file => {
-      if (!desiredVersions.includes(file.replace(prefix, '').replace(/.tar.gz$/, ''))) {
+      if (!desiredVersions.includes(file.replace(prefix + '-', '').replace(/\.tar\.gz$/, ''))) {
         fs.unlinkSync(path.join(tarPath, file));
         console.log(`Deleted outdated archive: ${file}`);
       }
@@ -110,8 +110,8 @@ function sortSemver(arr) {
 
 
 async function main() {
-  await getVersions();
-  await installVersions();
+  // await getVersions();
+  // await installVersions();
   await packVersions();
   console.log("builder tasks completed")
 }
